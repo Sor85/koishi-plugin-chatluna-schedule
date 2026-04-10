@@ -5,7 +5,7 @@
 
 import type { Context } from "koishi";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_TOOLS_CONFIG } from "../src/schema";
+import { DEFAULT_TOOLS_CONFIG } from "../schema";
 import {
   buildSummary,
   createScheduleService,
@@ -13,8 +13,8 @@ import {
   formatScheduleText,
   normalizeTime,
   type Schedule,
-} from "../src/services/schedule-service";
-import type { ToolRegistration } from "../src/types";
+} from "./schedule-service";
+import type { ToolRegistration } from "../types";
 
 const TOOL_DEFAULT_AVAILABILITY = {
   enabled: true,

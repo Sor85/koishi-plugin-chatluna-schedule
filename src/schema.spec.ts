@@ -9,7 +9,7 @@ import {
   DEFAULT_TOOLS_CONFIG,
   DEFAULT_VARIABLES_CONFIG,
   DEFAULT_WEATHER_CONFIG,
-} from "../src/schema";
+} from "./schema";
 
 describe("schema defaults", () => {
   it("provides expected schedule defaults", () => {

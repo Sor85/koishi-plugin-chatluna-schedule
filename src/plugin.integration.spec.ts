@@ -5,9 +5,9 @@
 
 import { describe, expect, it, vi } from "vitest";
 import type { Context } from "koishi";
-import { DEFAULT_TOOLS_CONFIG } from "../src/schema";
-import { registerChatLunaIntegrations } from "../src/integrations/chatluna";
-import type { ToolRegistration } from "../src/types";
+import { DEFAULT_TOOLS_CONFIG } from "./schema";
+import { registerChatLunaIntegrations } from "./integrations/chatluna";
+import type { ToolRegistration } from "./types";
 
 const TOOL_DEFAULT_AVAILABILITY = {
   enabled: true,

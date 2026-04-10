@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import type { Context } from "koishi";
-import { createWeatherService } from "../src/services/weather-service";
+import { createWeatherService } from "./weather-service";
 
 describe("weather service", () => {
   it("returns formatted weather text", async () => {

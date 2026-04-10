@@ -4,8 +4,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { DEFAULT_TOOLS_CONFIG } from "../src/schema";
-import { resolveToolsConfig, resolveVariablesConfig } from "../src/config";
+import { DEFAULT_TOOLS_CONFIG } from "./schema";
+import { resolveToolsConfig, resolveVariablesConfig } from "./config";
 
 describe("resolveVariablesConfig", () => {
   it("uses new variables config when present", () => {
