@@ -156,7 +156,7 @@ function createRuntime(ctx: Context, config: Config): PluginRuntime {
 
     registerChatLunaIntegrations({
       ctx,
-      plugin,
+      plugin: plugin as unknown as import("./types").ChatLunaPlugin,
       config,
       scheduleService,
       weatherService,

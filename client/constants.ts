@@ -3,7 +3,7 @@
  * 包含导航分组和插件候选名称
  */
 
-import type { SharedNavSection } from "shared-nav";
+import type { SharedNavSection } from "./shared-nav";
 
 export const NAV_SECTIONS: SharedNavSection[] = [
   { title: "日程设置", key: "schedule" },

@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { ComputedRef, computed, inject } from "vue";
-import { SharedNav } from "shared-nav";
+import { SharedNav } from "./shared-nav";
 import { NAV_SECTIONS, PLUGIN_CANDIDATE_NAMES } from "./constants";
 
 const pluginName = inject<ComputedRef<string>>("plugin:name");

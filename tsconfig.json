@@ -1,14 +1,36 @@
 {
-  "extends": "../../packages/tsconfig/base.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    "resolveJsonModule": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
     "outDir": "lib",
     "rootDir": "src",
     "incremental": true,
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "baseUrl": "./",
     "paths": {
-      "koishi-plugin-chatluna/services/chat": ["node_modules/koishi-plugin-chatluna/lib/services/chat"],
-      "koishi-plugin-chatluna/utils/string": ["node_modules/koishi-plugin-chatluna/lib/utils/string"]
+      "koishi-plugin-chatluna/services/chat": [
+        "node_modules/koishi-plugin-chatluna/lib/services/chat"
+      ],
+      "koishi-plugin-chatluna/utils/string": [
+        "node_modules/koishi-plugin-chatluna/lib/utils/string"
+      ]
     },
     "types": ["node", "vitest/globals"]
   },

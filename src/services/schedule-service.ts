@@ -644,10 +644,9 @@ export function createScheduleService(
 
     plugin.registerTool(toolName, {
       selector: () => true,
-      description: toolDescription,
-      meta: SCHEDULE_TOOL_META,
-      createTool: () =>
-        // @ts-expect-error zod 和 StructuredTool 的推导深度过大
+        description: toolDescription,
+        meta: SCHEDULE_TOOL_META,
+        createTool: () =>
         new (class extends StructuredTool {
           name = toolName;
           description = toolDescription;

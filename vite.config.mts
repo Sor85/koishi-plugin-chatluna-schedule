@@ -23,7 +23,6 @@ export default defineConfig({
         globals: {
           vue: "Vue",
           "@koishijs/client": "client",
-          "shared-nav": "sharedNav",
         },
         assetFileNames: "style.[ext]",
       },

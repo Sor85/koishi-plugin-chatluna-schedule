@@ -105,7 +105,6 @@ export function registerChatLunaIntegrations(
         description: weatherToolDescription,
         meta: WEATHER_TOOL_META,
         createTool: () =>
-          // @ts-expect-error zod 和 StructuredTool 组合会触发推导深度限制
           new (class extends StructuredTool {
             name = weatherToolName;
             description = weatherToolDescription;

@@ -12,9 +12,8 @@ import {
   derivePersonaTag,
   formatScheduleText,
   normalizeTime,
-  type Schedule,
 } from "./schedule-service";
-import type { ToolRegistration } from "../types";
+import type { Schedule, ToolRegistration } from "../types";
 
 const TOOL_DEFAULT_AVAILABILITY = {
   enabled: true,
