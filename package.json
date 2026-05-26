@@ -2,7 +2,7 @@
   "name": "koishi-plugin-chatluna-schedule",
   "description": "ChatLuna 日程与天气插件，提供今日日程和天气变量。",
   "version": "0.0.5",
-  "packageManager": "pnpm@10.27.0",
+  "packageManager": "yarn@4.15.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -28,18 +28,18 @@
     "plugin"
   ],
   "peerDependencies": {
+    "@koishijs/plugin-console": "^5.30.0",
     "koishi": "^4.18.7",
-    "koishi-plugin-chatluna": "*",
-    "@koishijs/plugin-console": "^5.30.0"
+    "koishi-plugin-chatluna": "*"
   },
   "peerDependenciesMeta": {
+    "@koishijs/plugin-console": {
+      "optional": true
+    },
     "koishi-plugin-chatluna-character": {
       "optional": true
     },
     "koishi-plugin-puppeteer": {
-      "optional": true
-    },
-    "@koishijs/plugin-console": {
       "optional": true
     }
   },
@@ -48,6 +48,7 @@
     "@types/node": "^22.10.1",
     "@vitejs/plugin-vue": "^6.0.2",
     "koishi": "^4.18.7",
+    "koishi-plugin-chatluna": "1.4.0-alpha.19",
     "sass": "^1.77.0",
     "tsup": "^8.0.0",
     "typescript": "^5.7.2",
