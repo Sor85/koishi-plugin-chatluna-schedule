@@ -4,7 +4,7 @@
  */
 
 import type { Context } from "koishi";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_TOOLS_CONFIG } from "../schema";
 import {
   buildSummary,
@@ -245,5 +245,69 @@ describe("schedule service tool registration", () => {
     );
     expect(tool.name).toBe("legacy_schedule");
     expect(tool.description).toBe("legacy schedule description");
+  });
+});
+
+describe("schedule service weather fallback", () => {
+  it("uses empty weather fallback when weather provider rejects", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const invoke = vi.fn(async (prompt: string) => {
+        expect(prompt).toContain("（暂无天气信息）");
+        return {
+          content: JSON.stringify({
+            title: "📅 今日日程",
+            description: "测试描述",
+            entries: [
+              {
+                start: "08:00",
+                end: "09:00",
+                activity: "晨间整理",
+                detail: "准备今天的计划",
+              },
+            ],
+          }),
+        };
+      });
+      const service = createScheduleService({
+        ctx: {} as Context,
+        config: {
+          schedule: {
+            enabled: true,
+            model: "",
+            personaSource: "none",
+            personaChatlunaPreset: "无",
+            personaCustomPreset: "",
+            timezone: "Asia/Shanghai",
+            renderAsImage: false,
+            startDelay: 1000,
+            prompt: "今日天气：{weather}",
+          },
+          weather: {
+            enabled: true,
+            cityName: "上海",
+            hourlyRefresh: false,
+          },
+        } as never,
+        getModel: () => ({ invoke }),
+        getMessageContent: (content) => String(content),
+        resolvePersonaPreset: () => "",
+        getWeatherText: async () => {
+          throw new Error("weather unavailable");
+        },
+        renderSchedule: async () => null,
+        log: () => {},
+      });
+
+      const promise = service.regenerateSchedule();
+      await vi.runAllTimersAsync();
+
+      const schedule = await promise;
+      expect(schedule?.text).toContain("晨间整理");
+      expect(invoke).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

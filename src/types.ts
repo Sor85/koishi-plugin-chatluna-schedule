@@ -115,6 +115,7 @@ export interface CurrentWeather {
 
 export interface WeatherQueryOptions {
   city?: string;
+  retry?: boolean;
 }
 
 export interface WeatherService {

@@ -83,4 +83,42 @@ describe("weather service", () => {
 
     expect(await service.getDailyWeather()).toBe("");
   });
+
+  it("can skip retry when weather data is unavailable", async () => {
+    const get = vi.fn(async (url: string) => {
+      if (url.startsWith("https://geocoding-api.open-meteo.com")) {
+        return {
+          results: [
+            {
+              name: "上海",
+              latitude: 31.23,
+              longitude: 121.47,
+              country: "中国",
+              admin1: "上海",
+              timezone: "Asia/Shanghai",
+            },
+          ],
+        };
+      }
+
+      throw new Error("weather unavailable");
+    });
+
+    const ctx = { http: { get } } as unknown as Context;
+    const service = createWeatherService({
+      ctx,
+      weatherConfig: {
+        enabled: true,
+        cityName: "上海",
+        hourlyRefresh: false,
+        registerTool: false,
+        toolName: "get_weather",
+        toolDescription: "获取当前天气信息，可返回详细文本或当前时段天气。",
+      },
+      log: () => {},
+    });
+
+    await expect(service.getDailyWeather({ retry: false })).resolves.toBe("");
+    expect(get).toHaveBeenCalledTimes(2);
+  });
 });

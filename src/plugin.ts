@@ -115,7 +115,7 @@ function createRuntime(ctx: Context, config: Config): PluginRuntime {
     },
     getMessageContent: getMessageContent as (content: unknown) => string,
     resolvePersonaPreset: () => resolveSchedulePersonaPreset(ctx, config),
-    getWeatherText: () => weatherService.getDailyWeather(),
+    getWeatherText: () => weatherService.getDailyWeather({ retry: false }),
     renderSchedule,
     log,
   });

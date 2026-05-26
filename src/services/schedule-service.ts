@@ -418,7 +418,12 @@ export function createScheduleService(
     const personaText =
       resolvePersonaPreset() || "（暂无额外设定，可按温和友善的年轻人）";
     const personaTag = derivePersonaTag(personaText);
-    const weatherText = await getWeatherText();
+    let weatherText = "";
+    try {
+      weatherText = await getWeatherText();
+    } catch (error) {
+      log("warn", "获取日程天气变量失败，已使用空天气信息", error);
+    }
 
     const prompt = applyPromptTemplate(scheduleConfig.prompt || "", {
       date: dateStr,

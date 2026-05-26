@@ -308,7 +308,7 @@ export function createWeatherService(deps: WeatherServiceDeps): WeatherService {
       cache.set(currentKey, result);
       return result;
     } catch (error) {
-      if (retryCount < MAX_RETRY - 1) {
+      if (options?.retry !== false && retryCount < MAX_RETRY - 1) {
         log(
           "warn",
           `获取天气数据失败，${retryCount + 1}/${MAX_RETRY} 次重试中...`,
