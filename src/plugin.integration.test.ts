@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Context } from "koishi";
 import { DEFAULT_TOOLS_CONFIG } from "./schema";
 import { registerChatLunaIntegrations } from "./integrations/chatluna";
-import type { ToolRegistration } from "./types";
+import type { PromptRendererLike, ToolRegistration } from "./types";
 
 const TOOL_DEFAULT_AVAILABILITY = {
   enabled: true,
@@ -247,5 +247,80 @@ describe("chatluna integrations", () => {
     );
     expect(weatherTool.name).toBe("legacy_weather");
     expect(weatherTool.description).toBe("legacy weather description");
+  });
+
+  it("returns cached weather variable while refreshing weather in background", async () => {
+    let weatherProvider: Parameters<
+      NonNullable<PromptRendererLike["registerFunctionProvider"]>
+    >[1];
+    const getHourlyWeather = vi.fn(
+      () =>
+        new Promise<string>((resolve) => {
+          setTimeout(() => resolve("晴，21°C"), 0);
+        }),
+    );
+
+    registerChatLunaIntegrations({
+      ctx: {
+        chatluna: {
+          promptRenderer: {
+            registerFunctionProvider: (name: string, provider: never) => {
+              if (name === "weather") weatherProvider = provider;
+              return () => {};
+            },
+          },
+        },
+      } as unknown as Context,
+      plugin: {
+        registerTool: vi.fn(),
+      },
+      config: {
+        schedule: {
+          enabled: false,
+          model: "",
+          personaSource: "none",
+          personaChatlunaPreset: "无",
+          personaCustomPreset: "",
+          timezone: "Asia/Shanghai",
+          prompt: "test",
+          renderAsImage: false,
+          startDelay: 1000,
+        },
+        weather: {
+          enabled: true,
+          cityName: "上海",
+          hourlyRefresh: false,
+        },
+        variables: {
+          schedule: "schedule",
+          currentSchedule: "currentSchedule",
+          outfit: "outfit",
+          currentOutfit: "currentOutfit",
+          weather: "weather",
+        },
+        tools: {
+          schedule: DEFAULT_TOOLS_CONFIG.schedule,
+          weather: DEFAULT_TOOLS_CONFIG.weather,
+        },
+      },
+      scheduleService: {
+        registerVariables: vi.fn(() => []),
+        registerTool: vi.fn(() => null),
+      } as never,
+      weatherService: {
+        getHourlyWeather,
+        getWeatherText: vi.fn(async () => "天气文本"),
+        getEffectiveCityName: vi.fn(() => "上海"),
+      } as never,
+      log: () => {},
+    });
+
+    expect(weatherProvider).toBeDefined();
+    await expect(weatherProvider?.([], {}, {})).resolves.toBe("");
+    expect(getHourlyWeather).toHaveBeenCalledWith({ city: "上海" });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    await expect(weatherProvider?.([], {}, {})).resolves.toBe("晴，21°C");
   });
 });

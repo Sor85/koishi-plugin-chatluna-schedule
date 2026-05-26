@@ -67,6 +67,8 @@ export function registerChatLunaIntegrations(
 
   if (config.weather.enabled) {
     const weatherVariableName = (variableConfig.weather || "weather").trim();
+    const weatherVariableCache = new Map<string, string>();
+    const pendingWeatherRefresh = new Set<string>();
     const promptRenderer = (
       ctx as unknown as {
         chatluna?: {
@@ -88,9 +90,23 @@ export function registerChatLunaIntegrations(
           const cityName = weatherService.getEffectiveCityName(
             configurable?.session,
           );
-          return weatherService.getHourlyWeather({
-            city: cityName || undefined,
-          });
+          const cityKey = cityName || "";
+          const refreshKey = cityKey || "__default__";
+          if (!pendingWeatherRefresh.has(refreshKey)) {
+            pendingWeatherRefresh.add(refreshKey);
+            void weatherService
+              .getHourlyWeather({ city: cityName || undefined })
+              .then((text) => {
+                weatherVariableCache.set(refreshKey, text || "");
+              })
+              .catch((error) => {
+                log("warn", "天气变量刷新失败", error);
+              })
+              .finally(() => {
+                pendingWeatherRefresh.delete(refreshKey);
+              });
+          }
+          return weatherVariableCache.get(refreshKey) || "";
         },
       );
       variableNames.push(weatherVariableName);
