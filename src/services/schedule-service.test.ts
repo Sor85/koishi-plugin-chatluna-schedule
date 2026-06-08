@@ -6,6 +6,7 @@
 import type { Context } from "koishi";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_TOOLS_CONFIG } from "../schema";
+import { DEFAULT_SCHEDULE_PROMPT } from "../constants";
 import {
   buildSummary,
   createScheduleService,
@@ -249,6 +250,79 @@ describe("schedule service tool registration", () => {
 });
 
 describe("schedule service weather fallback", () => {
+  it("asks the model to make activity specific enough for idle display", () => {
+    expect(DEFAULT_SCHEDULE_PROMPT).toContain(
+      "activity 用 6-10 个中文字符描述当前正在做什么",
+    );
+    expect(DEFAULT_SCHEDULE_PROMPT).toContain(
+      "不要只写“睡觉”“学习”“工作”等短词",
+    );
+  });
+
+  it("returns only current activity without time or detail", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const service = createScheduleService({
+        ctx: {} as Context,
+        config: {
+          schedule: {
+            enabled: true,
+            model: "",
+            personaSource: "none",
+            personaChatlunaPreset: "无",
+            personaCustomPreset: "",
+            timezone: "Asia/Shanghai",
+            renderAsImage: false,
+            startDelay: 1000,
+            prompt: "test",
+          },
+          weather: {
+            enabled: false,
+            cityName: "",
+            hourlyRefresh: false,
+          },
+        } as never,
+        getModel: () => ({
+          invoke: async () => ({
+            content: JSON.stringify({
+              title: "📅 今日日程",
+              description: "测试描述",
+              entries: [
+                {
+                  start: "00:00",
+                  end: "24:00",
+                  activity: "晨间整理今日计划",
+                  detail: "准备今天的计划",
+                },
+              ],
+            }),
+          }),
+        }),
+        getMessageContent: (content) => String(content),
+        resolvePersonaPreset: () => "",
+        getWeatherText: async () => "",
+        renderSchedule: async () => null,
+        log: () => {},
+      });
+
+      const promise = service.regenerateSchedule();
+      await vi.runAllTimersAsync();
+
+      const schedule = await promise;
+      expect(schedule?.entries[0]).toMatchObject({
+        activity: "晨间整理今日计划",
+        detail: "准备今天的计划",
+        summary: "晨间整理今日计划。准备今天的计划",
+      });
+      await expect(service.getCurrentActivity()).resolves.toBe(
+        "晨间整理今日计划",
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("uses empty weather fallback when weather provider rejects", async () => {
     vi.useFakeTimers();
 

@@ -167,6 +167,15 @@ export function buildSummary(title: string, detail: string): string {
   return `${head}${joiner}${body}`;
 }
 
+function getCurrentEntry(schedule: Schedule, timezone: string): ScheduleEntry | undefined {
+  const currentMinutes = getCurrentMinutes(timezone);
+  return schedule.entries.find(
+    (entry) =>
+      currentMinutes >= entry.startMinutes &&
+      currentMinutes < entry.endMinutes,
+  );
+}
+
 export function derivePersonaTag(persona: string): string {
   const text = String(persona || "").trim();
   if (!text) return "我";
@@ -346,6 +355,8 @@ export function createScheduleService(
         end: `${pad(Math.floor(safeEnd / 60))}:${pad(safeEnd % 60)}`,
         startMinutes: start.minutes,
         endMinutes: safeEnd,
+        activity,
+        ...(detail ? { detail } : {}),
         summary: buildSummary(
           activity,
           detail || `${personaTag}保持着角色状态`,
@@ -585,13 +596,7 @@ export function createScheduleService(
       ) => {
         const payload = await ensureSchedule(configurable?.session);
         if (!payload || !payload.entries.length) return "";
-
-        const currentMinutes = getCurrentMinutes(timezone);
-        const current = payload.entries.find(
-          (entry) =>
-            currentMinutes >= entry.startMinutes &&
-            currentMinutes < entry.endMinutes,
-        );
+        const current = getCurrentEntry(payload, timezone);
         if (!current) return payload.description || "";
         return `${current.start}-${current.end}：${current.summary}`;
       },
@@ -756,14 +761,14 @@ export function createScheduleService(
     },
     getCurrentSummary: async (session?: Session) => {
       const schedule = await ensureSchedule(session);
-      if (!schedule || !schedule.entries.length) return "";
-      const currentMinutes = getCurrentMinutes(timezone);
-      const current = schedule.entries.find(
-        (entry) =>
-          currentMinutes >= entry.startMinutes &&
-          currentMinutes < entry.endMinutes,
-      );
+      if (!schedule) return "";
+      const current = getCurrentEntry(schedule, timezone);
       return current ? current.summary : schedule.description || "";
+    },
+    getCurrentActivity: async (session?: Session) => {
+      const schedule = await ensureSchedule(session);
+      const current = schedule ? getCurrentEntry(schedule, timezone) : undefined;
+      return current?.activity || "";
     },
   };
 }

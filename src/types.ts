@@ -70,6 +70,8 @@ export interface ScheduleEntry {
   end: string;
   startMinutes: number;
   endMinutes: number;
+  activity?: string;
+  detail?: string;
   summary: string;
 }
 
@@ -140,6 +142,7 @@ export interface ScheduleService {
   getSchedule: (session?: Session) => Promise<Schedule | null>;
   getScheduleText: (session?: Session) => Promise<string>;
   getCurrentSummary: (session?: Session) => Promise<string>;
+  getCurrentActivity: (session?: Session) => Promise<string>;
 }
 
 export interface ChatLunaPlugin {
