@@ -9,6 +9,7 @@ import { ChatLunaPlugin } from "koishi-plugin-chatluna/services/chat";
 import { getMessageContent } from "koishi-plugin-chatluna/utils/string";
 import { registerChatLunaIntegrations } from "./integrations/chatluna";
 import { createScheduleRenderer } from "./renders/schedule";
+import { bindScheduleContextService } from "./service-binding";
 import { createScheduleService } from "./services/schedule-service";
 import { createWeatherService } from "./services/weather-service";
 import type {
@@ -18,6 +19,12 @@ import type {
   ScheduleService,
   WeatherService,
 } from "./types";
+
+declare module "koishi" {
+  interface Context {
+    chatluna_schedule: ScheduleService;
+  }
+}
 
 interface PluginRuntime {
   scheduleService: ScheduleService;
@@ -121,6 +128,10 @@ function createRuntime(ctx: Context, config: Config): PluginRuntime {
   });
 
   scheduleService.registerCommand();
+  const disposeScheduleContextService = bindScheduleContextService(
+    ctx,
+    scheduleService,
+  );
 
   let initialized = false;
 
@@ -177,6 +188,7 @@ function createRuntime(ctx: Context, config: Config): PluginRuntime {
     weatherService,
     dispose: () => {
       readyDispose();
+      disposeScheduleContextService();
       scheduleService.dispose();
       weatherService.invalidateCache();
     },
