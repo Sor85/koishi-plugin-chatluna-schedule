@@ -97,7 +97,7 @@ function createRuntime(ctx: Context, config: Config): PluginRuntime {
     weatherConfig: config.weather,
     log,
   });
-  const renderSchedule = createScheduleRenderer(ctx, log);
+  const renderSchedule = createScheduleRenderer(log);
 
   let scheduleModelRef: { value?: unknown } | unknown;
   let defaultModelRef: { value?: unknown } | unknown;

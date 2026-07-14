@@ -45,9 +45,6 @@
     },
     "koishi-plugin-chatluna-character": {
       "optional": true
-    },
-    "koishi-plugin-puppeteer": {
-      "optional": true
     }
   },
   "devDependencies": {
@@ -64,7 +61,10 @@
     "vue": "^3.5.21"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans-sc": "5.2.10",
     "@langchain/core": "^0.3.62",
+    "@takumi-rs/core": "1.8.7",
+    "@takumi-rs/helpers": "1.8.7",
     "zod": "^3.25.76"
   }
 }

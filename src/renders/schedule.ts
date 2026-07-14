@@ -3,16 +3,13 @@
  * 将日程与穿搭数据渲染为图片
  */
 
-import type { Context } from 'koishi'
 import type { LogFn, OutfitEntry, ScheduleEntry } from '../types'
-import { renderHtml, escapeHtmlForRender } from './base'
+import { escapeHtmlForRender, renderHtml } from './base'
 
 const COMMON_STYLE = `
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
-  @import url('https://fonts.googleapis.com/css?family=Noto+Color+Emoji');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: "Noto Sans SC", "Noto Color Emoji", "Segoe UI", "Microsoft YaHei", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    font-family: "Noto Sans SC", sans-serif;
     background: #f0f2f5;
     color: #1f2937;
   }
@@ -168,16 +165,13 @@ function buildScheduleHtml(data: ScheduleRenderData): string {
 </html>`
 }
 
-export function createScheduleRenderer(ctx: Context, log?: LogFn) {
+export function createScheduleRenderer(log?: LogFn) {
   return async (data: ScheduleRenderData): Promise<Buffer | null> => {
     const html = buildScheduleHtml(data)
     return renderHtml(
-      ctx,
       html,
       {
         width: 600,
-        height: 150 + data.entries.length * 100 + (data.outfits?.length || 0) * 90,
-        selector: '#schedule-root',
       },
       log,
     )

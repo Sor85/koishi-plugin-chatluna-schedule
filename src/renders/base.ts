@@ -1,65 +1,78 @@
 /**
- * 渲染基础工具
- * 提供 Puppeteer 渲染与 HTML 转义能力
+ * Takumi 渲染基础工具
+ * 负责复用渲染器、加载中文字体并准备 Emoji 图片资源
  */
 
-import type { Context } from 'koishi'
+import { readdirSync, readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { Renderer, extractResourceUrls } from '@takumi-rs/core'
+import { extractEmojis } from '@takumi-rs/helpers/emoji'
+import { fetchResources } from '@takumi-rs/helpers'
+import { fromHtml } from '@takumi-rs/helpers/html'
 import type { LogFn } from '../types'
-
-interface Puppeteer {
-  page: () => Promise<Page>
-}
-
-interface Page {
-  setViewport: (options: {
-    width: number
-    height: number
-    deviceScaleFactor?: number
-  }) => Promise<void>
-  setContent: (html: string, options: { waitUntil: string }) => Promise<void>
-  $: (selector: string) => Promise<ElementHandle | null>
-  close: () => Promise<void>
-}
-
-interface ElementHandle {
-  screenshot: (options: { omitBackground: boolean }) => Promise<Buffer>
-}
 
 export interface RenderOptions {
   width?: number
-  height?: number
   deviceScaleFactor?: number
-  selector?: string
 }
 
-function getPuppeteer(ctx: Context): Puppeteer | null {
-  return (ctx as unknown as { puppeteer?: Puppeteer }).puppeteer || null
+const fontDirectory = resolve(
+  dirname(require.resolve('@fontsource-variable/noto-sans-sc/package.json')),
+  'files',
+)
+const fonts = readdirSync(fontDirectory)
+  .filter((name) => name.endsWith('.woff2'))
+  .sort()
+  .map((name, index) => ({
+    name: `NotoSansSC_${index}`,
+    data: readFileSync(resolve(fontDirectory, name)),
+  }))
+const fontFamily = fonts.map((font) => `'${font.name}'`).join(',')
+const renderer = new Renderer({ fonts, loadDefaultFonts: true })
+
+function parseHtml(html: string) {
+  const stylesheets: string[] = []
+  const content = html.replace(
+    /<style\b[^>]*>([\s\S]*?)<\/style>/gi,
+    (_, stylesheet: string) => {
+      stylesheets.push(stylesheet)
+      return ''
+    },
+  )
+  const parsed = fromHtml(content)
+  return {
+    node: parsed.node,
+    stylesheets: [...parsed.stylesheets, ...stylesheets].map((stylesheet) =>
+      stylesheet.replaceAll('"Noto Sans SC"', fontFamily),
+    ),
+  }
 }
 
 export async function renderHtml(
-  ctx: Context,
   html: string,
   options: RenderOptions,
   log?: LogFn,
 ): Promise<Buffer | null> {
-  const puppeteer = getPuppeteer(ctx)
-  if (!puppeteer?.page) return null
+  const { width = 600, deviceScaleFactor = 2 } = options
 
-  const { width = 600, height = 400, deviceScaleFactor = 2, selector = '#root' } = options
-
-  let page: Page | undefined
   try {
-    page = await puppeteer.page()
-    await page.setViewport({ width, height, deviceScaleFactor })
-    await page.setContent(html, { waitUntil: 'networkidle0' })
-    const element = await page.$(selector)
-    if (!element) return null
-    return await element.screenshot({ omitBackground: false })
+    const parsed = parseHtml(html)
+    // Takumi 不直接绘制 Unicode Emoji，需要先转换为图片节点并显式下载资源。
+    const node = extractEmojis(parsed.node, 'twemoji')
+    const fetchedResources = await fetchResources(extractResourceUrls(node), {
+      throwOnError: false,
+    })
+
+    return await renderer.render(node, {
+      width: width * deviceScaleFactor,
+      devicePixelRatio: deviceScaleFactor,
+      format: 'png',
+      stylesheets: parsed.stylesheets,
+      fetchedResources,
+    })
   } catch (error) {
     log?.('warn', '图片渲染失败', error)
     return null
-  } finally {
-    await page?.close().catch(() => undefined)
   }
 }
 

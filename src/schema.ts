@@ -16,7 +16,7 @@ export const name = "chatluna-schedule";
 
 export const inject = {
   required: ["chatluna"],
-  optional: ["puppeteer", "chatluna_character"],
+  optional: ["chatluna_character"],
 };
 
 export const DEFAULT_SCHEDULE_CONFIG = {

@@ -13,7 +13,8 @@ npm i koishi-plugin-chatluna-schedule
 2. 在 Koishi 配置中启用插件，并确保已安装并启用：
    - `koishi-plugin-chatluna`
    - （可选）`koishi-plugin-chatluna-character`
-   - （可选）`koishi-plugin-puppeteer`
+
+   日程图片由插件内置的 Takumi 渲染，无需安装 Puppeteer。
 
 3. 在插件配置中设置：
    - `schedule`（日程生成配置）
